@@ -27,7 +27,7 @@ var currentUser = func() *user.User {
 // Session is the basic configuration required for interaction
 // with the Accumulate Network
 type Session struct {
-	API client.APIClient
+	API *client.APIClient
 	Db  db.DB
 }
 
@@ -53,12 +53,14 @@ func MakeSession(address string) (session Session, err error) {
 		return
 	}
 
+    cmd.WantJsonOutput = true
 	cmd.Db = initDB(filepath.Join(currentUser.HomeDir, ".accumulate"))
+    cmd.Client = &client.APIClient{
+        Server: url.String(),
+    }
 
 	session = Session{
-		API: client.APIClient{
-			Server: url.String(),
-		},
+		API: cmd.Client,
 		Db: cmd.Db,
 	}
 

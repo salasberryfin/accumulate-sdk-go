@@ -28,3 +28,12 @@ func (s Session) GetAccount(url string) (string, error) {
 
 	return cmd.PrintQueryResponse(&res)
 }
+
+func (s Session) Faucet(url string) (string, error) {
+    result, err := cmd.Faucet(url)
+    if err != nil {
+        return "", err
+    }
+
+    return result, nil
+}

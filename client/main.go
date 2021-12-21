@@ -7,9 +7,9 @@ import (
 	"os/user"
 	"path/filepath"
 
-	"github.com/AccumulateNetwork/accumulate/client"
-	"github.com/AccumulateNetwork/accumulate/cmd/cli/cmd"
-	"github.com/AccumulateNetwork/accumulate/cmd/cli/db"
+	"github.com/salasberryfin/accumulate-sdk-go/api"
+	"github.com/salasberryfin/accumulate-sdk-go/config"
+	"github.com/salasberryfin/accumulate-sdk-go/db"
 )
 
 const (
@@ -27,8 +27,9 @@ var currentUser = func() *user.User {
 // Session is the basic configuration required for interaction
 // with the Accumulate Network
 type Session struct {
-	API *client.APIClient
-	Db  db.DB
+	Client     *api.APIClient
+	Db         db.DB
+	JSONOutput bool
 }
 
 func initDB(defaultWorkDir string) db.DB {
@@ -53,15 +54,20 @@ func MakeSession(address string) (session Session, err error) {
 		return
 	}
 
-    cmd.WantJsonOutput = true
-	cmd.Db = initDB(filepath.Join(currentUser.HomeDir, ".accumulate"))
-    cmd.Client = &client.APIClient{
-        Server: url.String(),
-    }
+	sessionJSON := true
+	sessionDb := initDB(filepath.Join(currentUser.HomeDir, ".accumulate"))
+
+	// configure parameters for Sdk
+	config.ConfigureAPIClient(address)
+	config.ConfigureDb(sessionDb)
+	config.WantJsonOutput = sessionJSON
 
 	session = Session{
-		API: cmd.Client,
-		Db: cmd.Db,
+		Client: &api.APIClient{
+			Server: url.String(),
+		},
+		Db:         sessionDb,
+		JSONOutput: sessionJSON,
 	}
 
 	return

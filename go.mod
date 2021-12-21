@@ -40,4 +40,4 @@ require (
 	rsc.io/qr v0.2.0 // indirect
 )
 
-//replace github.com/AccumulateNetwork/accumulate v0.2.2-0.20211126221634-72db7a0fbac9 => ./accumulate
+replace github.com/AccumulateNetwork/accumulate v0.2.2-0.20211126221634-72db7a0fbac9 => ./accumulate

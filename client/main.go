@@ -6,14 +6,11 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"reflect"
 
 	"github.com/AccumulateNetwork/accumulate/client"
 	"github.com/AccumulateNetwork/accumulate/cmd/cli/cmd"
 	"github.com/AccumulateNetwork/accumulate/cmd/cli/db"
-)
-
-const (
-	defaultTestNet = "https://testnet.accumulatenetwork.io/v1"
 )
 
 var currentUser = func() *user.User {
@@ -24,11 +21,18 @@ var currentUser = func() *user.User {
 	return usr
 }()
 
-// Session is the basic configuration required for interaction
+// Options for Session creation
+type Options struct {
+	ServerURL  string `default:"https://testnet.accumulatenetwork.io/v1"`
+	JSONOutput bool   `default:"true"`
+}
+
+// Session is the basic unit required for interaction
 // with the Accumulate Network
 type Session struct {
-	API *client.APIClient
-	Db  db.DB
+	API        *client.APIClient
+	Db         db.DB
+	JSONOutput bool
 }
 
 func initDB(defaultWorkDir string) db.DB {
@@ -46,22 +50,33 @@ func initDB(defaultWorkDir string) db.DB {
 	return db
 }
 
-// MakeSession creates a new session required for any Sdk interaction
-func MakeSession(address string) (session Session, err error) {
-	url, err := url.Parse(address)
+// NewSession creates a new session required for any Sdk interaction
+func NewSession(options Options) (session Session, err error) {
+	log.Println("Initializing session.")
+
+	typ := reflect.TypeOf(options)
+	if options.ServerURL == "" {
+		f, _ := typ.FieldByName("ServerURL")
+		options.ServerURL = f.Tag.Get("default")
+	}
+
+	url, err := url.Parse(options.ServerURL)
 	if err != nil {
 		return
 	}
 
-    cmd.WantJsonOutput = true
+	cmd.WantJsonOutput = options.JSONOutput
 	cmd.Db = initDB(filepath.Join(currentUser.HomeDir, ".accumulate"))
-    cmd.Client = &client.APIClient{
-        Server: url.String(),
-    }
+	cmd.Client = &client.APIClient{
+		Server: url.String(),
+	}
 
 	session = Session{
-		API: cmd.Client,
-		Db: cmd.Db,
+		API: &client.APIClient{
+			Server: options.ServerURL,
+		},
+		Db:         cmd.Db,
+		JSONOutput: options.JSONOutput,
 	}
 
 	return

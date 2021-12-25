@@ -11,6 +11,8 @@ import (
 	"github.com/AccumulateNetwork/accumulate/client"
 	"github.com/AccumulateNetwork/accumulate/cmd/cli/cmd"
 	"github.com/AccumulateNetwork/accumulate/cmd/cli/db"
+
+	"github.com/salasberryfin/accumulate-sdk-go/api"
 )
 
 var currentUser = func() *user.User {
@@ -30,7 +32,7 @@ type Options struct {
 // Session is the basic unit required for interaction
 // with the Accumulate Network
 type Session struct {
-	API        *client.APIClient
+	API        *api.Client
 	Db         db.DB
 	JSONOutput bool
 }
@@ -72,9 +74,7 @@ func NewSession(options Options) (session Session, err error) {
 	}
 
 	session = Session{
-		API: &client.APIClient{
-			Server: options.ServerURL,
-		},
+		API:        api.NewAPIClient(url.String()),
 		Db:         cmd.Db,
 		JSONOutput: options.JSONOutput,
 	}

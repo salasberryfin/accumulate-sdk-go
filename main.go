@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/salasberryfin/accumulate-sdk-go/account"
+	"github.com/salasberryfin/accumulate-sdk-go/api"
 	accsdk "github.com/salasberryfin/accumulate-sdk-go/client"
 	"github.com/salasberryfin/accumulate-sdk-go/faucet"
 )
@@ -45,9 +46,13 @@ func main() {
 	faucetClient := faucet.New(sdkSession)
 	faucetResult, err := faucetClient.SendFaucet(jsonData.Label)
 	if err != nil {
-		log.Println("Failed to send faucet: ", err)
+		log.Fatal("Failed to send faucet: ", err)
 	}
-	log.Println("faucetResult: ", faucetResult)
+	faucetResponse := api.APIResponse{}
+	json.Unmarshal(faucetResult, &faucetResponse)
+	faucetData := api.FaucetData{}
+	json.Unmarshal(*faucetResponse.Result.Data, &faucetData)
+	log.Println("Faucet TxID: ", faucetData.TxID)
 
 	// Wait for faucet to be processed -> validate test
 	time.Sleep(10 * time.Second)
@@ -55,5 +60,10 @@ func main() {
 	if err != nil {
 		log.Println("Failed to retrieve account details: ", err)
 	}
-	log.Println(details)
+	accountResponse := api.APIResponse{}
+	log.Println("Account details: ", string(details))
+	json.Unmarshal(details, &accountResponse)
+	accountData := api.TokenAccountData{}
+	json.Unmarshal(*faucetResponse.Result.Data, &faucetData)
+	log.Println("Account balance: ", accountData.Balance)
 }

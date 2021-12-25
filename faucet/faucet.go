@@ -1,7 +1,7 @@
 package faucet
 
 import (
-	"github.com/AccumulateNetwork/accumulate/cmd/cli/cmd"
+	acmeapi "github.com/salasberryfin/accumulate-sdk-go/api"
 	accsdk "github.com/salasberryfin/accumulate-sdk-go/client"
 )
 
@@ -25,11 +25,17 @@ func New(s accsdk.Session, options ...Options) *Faucet {
 }
 
 // SendFaucet creates sends test tokens
-func (f Faucet) SendFaucet(url string) (string, error) {
-	result, err := cmd.Faucet(url)
-	if err != nil {
-		return "", err
+func (f Faucet) SendFaucet(url string) (resp []byte, err error) {
+	req := acmeapi.GenericRequest{
+		JSONRpc: "2.0",
+		ID:      0,
+		Method:  "faucet",
+		Params: acmeapi.Params{
+			URL: url,
+		},
 	}
 
-	return result, nil
+	resp, err = f.session.API.SubmitRequestV1(&req, true)
+
+	return
 }

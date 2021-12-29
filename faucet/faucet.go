@@ -1,41 +1,41 @@
 package faucet
 
 import (
-	acmeapi "github.com/salasberryfin/accumulate-sdk-go/api"
-	accsdk "github.com/salasberryfin/accumulate-sdk-go/client"
+	"github.com/salasberryfin/accumulate-sdk-go/api"
 )
 
-// Options additional configuration options for the faucet
+// Options is implemented to allow passing extra parameters if needed
 type Options struct {
 }
 
-// Faucet is an instance for an Accumulate tx
+// Faucet is an instance for an Accumulate faucet tx
 type Faucet struct {
-	session accsdk.Session
-	options Options
+	APIClient    *api.Client
+	extraOptions Options
 }
 
-// New creates a new Faucet instance
-func New(s accsdk.Session, options ...Options) *Faucet {
+// New creates a new instance of a Faucet
+func New(apiClient *api.Client, options Options) *Faucet {
 	f := Faucet{
-		session: s,
+		APIClient:    apiClient,
+		extraOptions: options,
 	}
 
 	return &f
 }
 
-// SendFaucet creates sends test tokens
-func (f Faucet) SendFaucet(url string) (resp []byte, err error) {
-	req := acmeapi.GenericRequest{
+// SendFaucet sends test tokens
+func (f Faucet) SendFaucet(url string) (resp api.FaucetResponse, err error) {
+	req := api.GenericRequest{
 		JSONRpc: "2.0",
 		ID:      0,
 		Method:  "faucet",
-		Params: acmeapi.Params{
+		Params: api.Params{
 			URL: url,
 		},
 	}
 
-	resp, err = f.session.API.SubmitRequestV1(&req, true)
+	err = f.APIClient.SendRequestV1(req, &resp)
 
 	return
 }
